@@ -1,6 +1,7 @@
 services:
   mongo:
     image: mongo:latest
+    container_name: "mongo-devops-app"
     ports:
       - '27017:27017'
     volumes:
@@ -10,6 +11,7 @@ services:
   app:
     build:
       context: .
+    container_name: "nodej-devops-app"
     ports:
       - '4000:3000'
     env_file:
