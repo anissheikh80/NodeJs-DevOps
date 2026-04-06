@@ -9,7 +9,7 @@
     "dev": "node index.js --watch"
   },
   "keywords": [],
-  "author": "",
+  "author": "anissheikh80",
   "license": "ISC",
   "description": "",
   "dependencies": {
