@@ -1,13 +1,40 @@
 services:
-  mongo:
-    image: mongo:latest
+  mongodb:
+    image: prismagraphql/mongo-single-replica:4.4.3-bionic
     container_name: "mongo-devops-app"
+    env_file:
+      - ./.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
     networks:
       - devops-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express-devops-app
+    restart: unless-stopped
+    ports:
+      - 8082:8081
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/devops-node?authSource=admin
+      ME_CONFIG_BASICAUTH_ENABLED: true
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
+    networks:
+      - devops-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
   app:
     build:
       context: .
@@ -15,14 +42,14 @@ services:
     ports:
       - '4000:3000'
     env_file:
-      - .env
+      - ./.env
     volumes:
-      - .:/app
+      - ./:/app
       - /app/node_modules
     networks:
       - devops-network
     depends_on:
-      - mongo
+      - mongodb
     restart: unless-stopped
 
 volumes:
