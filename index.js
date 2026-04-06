@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('Hello World V3 deploy using github actions and aws ecs');
+  res.send('Hello World V4 deployed');
 });
 
 app.get('/health', (req, res) => {
