@@ -1,19 +1,19 @@
 services:
   mongodb:
     image: prismagraphql/mongo-single-replica:4.4.3-bionic
-    container_name: "mongo-devops-app"
+    container_name: mongo-devops-app
     env_file:
       - ./.env
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
     ports:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
     networks:
       - devops-network
-    restart: unless-stopped
+    restart: always
     healthcheck:
       test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
       interval: 10s
@@ -22,14 +22,15 @@ services:
   mongo-express:
     image: mongo-express
     container_name: mongo-express-devops-app
-    restart: unless-stopped
+    restart: always
     ports:
       - 8082:8081
     environment:
-      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/devops-node?authSource=admin
+      ME_CONFIG_MONGODB_URL: mongodb://root:root@mongodb:27017/devops-node
       ME_CONFIG_BASICAUTH_ENABLED: true
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: devops-node
+      ME_CONFIG_BASICAUTH_USERNAME: root
+      ME_CONFIG_BASICAUTH_PASSWORD: root
     networks:
       - devops-network
     depends_on:
@@ -38,7 +39,7 @@ services:
   app:
     build:
       context: .
-    container_name: "nodej-devops-app"
+    container_name: "nodejs-devops-app"
     ports:
       - '4000:3000'
     env_file:
